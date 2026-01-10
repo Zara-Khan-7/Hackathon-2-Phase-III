@@ -8,3 +8,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+// Trigger redeploy Sat, Jan 10, 2026  7:16:23 PM
