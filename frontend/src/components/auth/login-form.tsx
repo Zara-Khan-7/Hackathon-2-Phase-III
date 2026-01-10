@@ -56,8 +56,8 @@ export function LoginForm() {
         return;
       }
 
-      // Redirect to dashboard on success
-      router.push("/dashboard");
+      // Use window.location for full page reload to ensure cookie is sent
+      window.location.href = "/dashboard";
     } catch {
       setErrors({ general: "An unexpected error occurred. Please try again." });
       setIsLoading(false);
