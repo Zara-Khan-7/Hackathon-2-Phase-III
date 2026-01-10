@@ -1,8 +1,103 @@
-# Claude Code Rules
+﻿# Claude Code Rules
 
 This file is generated during init for the selected agent.
 
 You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+
+---
+
+## Project: Todo Full-Stack Web Application (Phase II)
+
+### Project Overview
+Transform a console todo app into a modern multi-user web application with persistent storage using the Agentic Dev Stack workflow: Write spec → Generate plan → Break into tasks → Implement via Claude Code.
+
+### Technology Stack
+
+| Layer          | Technology                      |
+|----------------|--------------------------------|
+| Frontend       | Next.js 16+ (App Router)       |
+| Backend        | Python FastAPI                 |
+| ORM            | SQLModel                       |
+| Database       | Neon Serverless PostgreSQL     |
+| Spec-Driven    | Claude Code + Spec-Kit Plus    |
+| Authentication | Better Auth (JWT tokens)       |
+
+### Specialized Agent Usage
+
+Use the following specialized agents for their designated domains:
+
+#### 1. Authentication - `auth-security-specialist`
+**Use for:** All authentication-related implementation and security
+- Better Auth integration and configuration
+- JWT token generation and validation
+- User signup/signin flows
+- Session management
+- OAuth/SSO provider setup if needed
+- Security audits of auth flows
+- Token verification in backend requests
+
+**Authentication Flow:**
+1. User logs in on Frontend → Better Auth creates session and issues JWT token
+2. Frontend makes API call → Includes JWT in `Authorization: Bearer <token>` header
+3. Backend receives request → Extracts token, verifies signature using shared secret
+4. Backend identifies user → Decodes token to get user ID, email, etc.
+5. Backend filters data → Returns only tasks belonging to that user
+
+#### 2. API & Backend Development - `neon-postgres-manager`
+**Use for:** Backend logic and API development
+- RESTful API endpoint design and implementation
+- FastAPI route handlers and middleware
+- Request/response models with Pydantic
+- SQLModel ORM operations
+- Database connection pooling configuration
+- Serverless database connection setup
+- Query optimization
+- API authentication middleware (JWT validation)
+
+#### 3. Frontend Development - `nextjs-ui-builder`
+**Use for:** All frontend UI implementation
+- Next.js 16+ App Router pages and layouts
+- Responsive UI components
+- Form handling and data mutations
+- Client/server component separation (`'use client'` directives)
+- Dashboard and task management interfaces
+- User authentication UI (login/signup forms)
+- State management for user sessions
+- API integration from frontend
+
+#### 4. Database Design & Operations - `best-practices-advisor`
+**Use for:** Database architecture and best practices
+- Database schema design
+- Table relationships and foreign keys
+- Index optimization strategies
+- Data modeling best practices
+- Migration strategies
+- Security best practices for data storage
+- Performance optimization guidance
+
+### Core Features to Implement
+1. User Authentication (signup/signin with Better Auth)
+2. Task CRUD operations (Create, Read, Update, Delete)
+3. Task status management (pending, completed)
+4. Task priority levels
+5. Task due dates
+6. User-specific task isolation (multi-tenant)
+
+### API Design Guidelines
+- RESTful endpoints following REST conventions
+- JWT authentication on protected routes
+- User ID extraction from JWT for data filtering
+- Proper error handling with status codes
+- Input validation using Pydantic models
+
+### Security Requirements
+- Never hardcode secrets or tokens; use `.env` files
+- JWT secret shared between Better Auth and FastAPI backend
+- All user data queries must filter by authenticated user ID
+- CORS configuration for frontend-backend communication
+- Input sanitization to prevent injection attacks
+
+---
 
 ## Task context
 
@@ -198,6 +293,7 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Basic Project Structure
 
+### Spec-Kit Plus Artifacts
 - `.specify/memory/constitution.md` — Project principles
 - `specs/<feature>/spec.md` — Feature requirements
 - `specs/<feature>/plan.md` — Architecture decisions
@@ -206,5 +302,56 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 - `history/adr/` — Architecture Decision Records
 - `.specify/` — SpecKit Plus templates and scripts
 
+### Application Structure
+```
+Phase II/
+├── frontend/                    # Next.js 16+ Application
+│   ├── app/                     # App Router directory
+│   │   ├── (auth)/              # Auth route group
+│   │   │   ├── login/           # Login page
+│   │   │   └── signup/          # Signup page
+│   │   ├── dashboard/           # Protected dashboard
+│   │   ├── api/                 # API routes (if needed)
+│   │   ├── layout.tsx           # Root layout
+│   │   └── page.tsx             # Home page
+│   ├── components/              # Reusable UI components
+│   ├── lib/                     # Utilities, auth config
+│   └── package.json
+│
+├── backend/                     # Python FastAPI Application
+│   ├── app/
+│   │   ├── main.py              # FastAPI app entry point
+│   │   ├── models/              # SQLModel database models
+│   │   ├── routers/             # API route handlers
+│   │   ├── schemas/             # Pydantic schemas
+│   │   ├── auth/                # JWT verification middleware
+│   │   └── database.py          # Neon DB connection
+│   ├── requirements.txt
+│   └── .env                     # Database URL, JWT secret
+│
+├── specs/                       # Feature specifications
+├── history/                     # PHRs and ADRs
+└── .specify/                    # SpecKit Plus config
+```
+
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Development Workflow
+
+### Agentic Dev Stack Process
+1. **Write Spec** (`/sp.specify`) — Define feature requirements
+2. **Generate Plan** (`/sp.plan`) — Create architectural design
+3. **Break into Tasks** (`/sp.tasks`) — Generate actionable task list
+4. **Implement** (`/sp.implement`) — Execute tasks via Claude Code
+
+### Agent Dispatch Rules
+When implementing features, dispatch to the appropriate specialized agent:
+
+| Task Type | Agent | Example Tasks |
+|-----------|-------|---------------|
+| Auth setup, login/signup, JWT | `auth-security-specialist` | Configure Better Auth, implement JWT validation |
+| API endpoints, FastAPI routes | `neon-postgres-manager` | Create CRUD endpoints, setup middleware |
+| UI pages, components, forms | `nextjs-ui-builder` | Build dashboard, task list, forms |
+| Schema design, queries | `best-practices-advisor` | Design User/Task tables, optimize queries |
+| DB connections, migrations | `neon-postgres-manager` | Setup Neon connection, run migrations |

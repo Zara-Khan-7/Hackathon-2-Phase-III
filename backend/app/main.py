@@ -1,0 +1,72 @@
+"""
+FastAPI application entry point.
+Configures CORS, database initialization, and health check endpoint.
+"""
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from contextlib import asynccontextmanager
+from datetime import datetime
+
+from app.config import get_settings
+from app.database import create_db_and_tables
+from app.routers import tasks
+
+# Get settings
+settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan - initialize database on startup."""
+    # Startup: create database tables
+    create_db_and_tables()
+    yield
+    # Shutdown: cleanup if needed
+    pass
+
+
+# Create FastAPI application
+app = FastAPI(
+    title="Todo API - Backend Core",
+    description="RESTful API for managing user-owned tasks with JWT authentication.",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+# Configure CORS middleware
+origins = settings.cors_origins.split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
+
+# Register routers
+app.include_router(tasks.router)
+
+
+# Structured error response handler for validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Return structured validation errors with field-level details."""
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
+
+
+@app.get("/health", tags=["System"])
+def health_check():
+    """
+    Health check endpoint - no authentication required.
+    Returns API health status.
+    """
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat() + "Z"
+    }
