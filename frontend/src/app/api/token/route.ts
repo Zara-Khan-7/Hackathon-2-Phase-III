@@ -3,6 +3,9 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import * as jose from "jose";
 
+// Force dynamic rendering - don't try to build at compile time
+export const dynamic = "force-dynamic";
+
 // Secret must match backend JWT_SECRET
 const JWT_SECRET = process.env.BETTER_AUTH_SECRET || "test-secret-key-for-development-only";
 
