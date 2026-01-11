@@ -10,8 +10,10 @@ const authRoutes = ["/login", "/signup"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check for Better Auth session cookie
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Check for Better Auth session cookie (both secure and non-secure versions)
+  const sessionCookie =
+    request.cookies.get("better-auth.session_token") ||
+    request.cookies.get("__Secure-better-auth.session_token");
   const hasSession = !!sessionCookie?.value;
 
   // Redirect authenticated users away from auth pages
