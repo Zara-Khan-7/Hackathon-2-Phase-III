@@ -179,7 +179,22 @@ class AgentRunner:
                     "content": json.dumps(result)
                 })
 
-            messages.append(assistant_message)
+            # Convert to dict format for Groq compatibility
+            messages.append({
+                "role": "assistant",
+                "content": assistant_message.content or "",
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments
+                        }
+                    }
+                    for tc in assistant_message.tool_calls
+                ]
+            })
             messages.extend(tool_results)
 
             response = await self.client.chat.completions.create(
