@@ -27,7 +27,9 @@ class AgentRunner:
             api_key=settings.groq_api_key,
             base_url="https://api.groq.com/openai/v1"
         )
-        self.model = "llama-3.3-70b-versatile"  # Groq's best model with tool calling
+        # Use Llama 3.1 for tool calling - more stable than 3.3
+        self.model = "llama-3.1-70b-versatile"
+        self.fallback_model = "llama-3.1-8b-instant"  # Fallback for errors
 
     async def run(
         self,
@@ -48,19 +50,37 @@ class AgentRunner:
         """
         tools_invoked: List[ToolInvocation] = []
 
-        # Build messages array
-        messages = self._build_messages(user_message, conversation_history)
+        # Build messages array - don't include history for tool calls to avoid Groq issues
+        messages = self._build_messages(user_message, None)
 
         # Get tool definitions
         tools = mcp_server.get_tool_definitions()
 
-        # Call OpenAI with tools
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            tools=tools if tools else None,
-            tool_choice="auto" if tools else None,
-        )
+        try:
+            # Call OpenAI with tools
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=tools if tools else None,
+                tool_choice="auto" if tools else None,
+            )
+        except Exception as e:
+            # If tool calling fails, try with fallback model
+            print(f"Tool call failed: {e}, retrying with fallback model")
+            try:
+                response = await self.client.chat.completions.create(
+                    model=self.fallback_model,
+                    messages=messages,
+                    tools=tools if tools else None,
+                    tool_choice="auto" if tools else None,
+                )
+            except Exception as e2:
+                print(f"Fallback also failed: {e2}, responding without tools")
+                response = await self.client.chat.completions.create(
+                    model=self.fallback_model,
+                    messages=self._build_messages(user_message, conversation_history),
+                )
+                return response.choices[0].message.content or "I encountered an issue. Please try again.", tools_invoked
 
         assistant_message = response.choices[0].message
 
@@ -70,7 +90,10 @@ class AgentRunner:
             tool_results = []
             for tool_call in assistant_message.tool_calls:
                 tool_name = tool_call.function.name
-                arguments = json.loads(tool_call.function.arguments)
+                try:
+                    arguments = json.loads(tool_call.function.arguments) or {}
+                except (json.JSONDecodeError, TypeError):
+                    arguments = {}
 
                 # Inject user_id into tool arguments for isolation
                 arguments["user_id"] = user_id
@@ -136,19 +159,30 @@ class AgentRunner:
         """
         tools_invoked: List[ToolInvocation] = []
 
-        # Build messages array
-        messages = self._build_messages(user_message, conversation_history)
+        # Build messages array - skip history to avoid Groq tool call issues
+        messages = self._build_messages(user_message, None)
 
         # Get tool definitions
         tools = mcp_server.get_tool_definitions()
 
         # First, handle any tool calls (non-streaming for tool execution)
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            tools=tools if tools else None,
-            tool_choice="auto" if tools else None,
-        )
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=tools if tools else None,
+                tool_choice="auto" if tools else None,
+            )
+        except Exception as e:
+            print(f"Stream tool call failed: {e}, using fallback")
+            # Fallback to simple response without tools
+            response = await self.client.chat.completions.create(
+                model=self.fallback_model,
+                messages=self._build_messages(user_message, conversation_history),
+            )
+            yield {"type": "content", "data": response.choices[0].message.content or "I had trouble processing that. Please try again."}
+            yield {"type": "done", "data": {"tools_invoked": []}}
+            return
 
         assistant_message = response.choices[0].message
 
@@ -157,7 +191,10 @@ class AgentRunner:
             tool_results = []
             for tool_call in assistant_message.tool_calls:
                 tool_name = tool_call.function.name
-                arguments = json.loads(tool_call.function.arguments)
+                try:
+                    arguments = json.loads(tool_call.function.arguments) or {}
+                except (json.JSONDecodeError, TypeError):
+                    arguments = {}
                 arguments["user_id"] = user_id
 
                 result = await mcp_server.execute_tool(tool_name, arguments)
@@ -233,8 +270,10 @@ class AgentRunner:
         """Build the messages array for OpenAI API."""
         messages = [{"role": "system", "content": get_system_prompt()}]
 
+        # Only include last 4 messages to avoid confusing Groq with long history
         if conversation_history:
-            messages.extend(conversation_history)
+            recent_history = conversation_history[-4:]
+            messages.extend(recent_history)
 
         messages.append({"role": "user", "content": user_message})
 
