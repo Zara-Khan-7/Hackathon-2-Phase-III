@@ -3,6 +3,7 @@ Chat API endpoint for AI-powered task management.
 Single stateless endpoint that processes natural language messages.
 """
 import json
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
@@ -47,7 +48,7 @@ def get_or_create_conversation(
 
 def load_conversation_history(
     session: Session,
-    conversation_id: str,
+    conversation_id: UUID,
     limit: int = CONTEXT_WINDOW_SIZE
 ) -> List[Dict[str, str]]:
     """
@@ -80,7 +81,7 @@ def load_conversation_history(
 
 def store_message(
     session: Session,
-    conversation_id: str,
+    conversation_id: UUID,
     role: MessageRole,
     content: str,
     tool_calls: List[ToolInvocation] = None
@@ -127,10 +128,10 @@ async def chat(
     conversation = get_or_create_conversation(session, user_id)
 
     # Load conversation history for context
-    history = load_conversation_history(session, str(conversation.id))
+    history = load_conversation_history(session, conversation.id)
 
     # Store user message
-    store_message(session, str(conversation.id), MessageRole.user, request.message)
+    store_message(session, conversation.id, MessageRole.user, request.message)
 
     # Update conversation timestamp
     conversation.updated_at = datetime.utcnow()
@@ -154,7 +155,7 @@ async def chat(
     # Store assistant response
     store_message(
         session,
-        str(conversation.id),
+        conversation.id,
         MessageRole.assistant,
         response_message,
         tools_invoked
@@ -197,7 +198,7 @@ async def stream_response(
             # Store the complete assistant response
             store_message(
                 session,
-                str(conversation.id),
+                conversation.id,
                 MessageRole.assistant,
                 full_content,
                 tools_invoked
