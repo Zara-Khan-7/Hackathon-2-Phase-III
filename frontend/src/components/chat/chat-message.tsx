@@ -1,21 +1,37 @@
 "use client";
 
+import * as React from "react";
+import { motion } from "framer-motion";
 import { ChatMessage as ChatMessageType, ToolInvocation } from "@/lib/api/chat";
 import { cn } from "@/lib/utils";
+import { ChatAvatar } from "./chat-avatar";
+import {
+  userMessageVariants,
+  assistantMessageVariants,
+  scaleInVariants,
+} from "@/lib/animations";
 
 interface ChatMessageProps {
   message: ChatMessageType;
   showToolCalls?: boolean;
+  showAvatar?: boolean;
 }
 
+/**
+ * Tool Call Badge with animation
+ */
 function ToolCallBadge({ tool }: { tool: ToolInvocation }) {
   return (
-    <span
+    <motion.span
+      variants={scaleInVariants}
+      initial="hidden"
+      animate="visible"
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium animate-scale-in",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+        "transition-all duration-200",
         tool.success
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
+          ? "bg-aurora-green-500/20 text-aurora-green-700 dark:text-aurora-green-400 border border-aurora-green-500/30"
+          : "bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30"
       )}
     >
       {tool.success ? (
@@ -28,51 +44,115 @@ function ToolCallBadge({ tool }: { tool: ToolInvocation }) {
         </svg>
       )}
       {tool.tool_name.replace(/_/g, " ")}
-    </span>
+    </motion.span>
   );
 }
 
-export function ChatMessage({ message, showToolCalls = true }: ChatMessageProps) {
+/**
+ * Enhanced Chat Message Component
+ *
+ * Features:
+ * - User: Right-aligned, aurora gradient
+ * - Bot: Left-aligned with avatar
+ * - Staggered entrance animations
+ * - Tool invocation badges with animations
+ * - Glassmorphism design for assistant messages
+ */
+export function ChatMessage({
+  message,
+  showToolCalls = true,
+  showAvatar = true,
+}: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
-    <div
+    <motion.div
+      variants={isUser ? userMessageVariants : assistantMessageVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       className={cn(
-        "flex w-full",
-        isUser ? "justify-end animate-slide-in-right" : "justify-start animate-slide-in-left"
+        "flex w-full items-end gap-2",
+        isUser ? "justify-end" : "justify-start"
       )}
     >
-      <div
+      {/* Avatar for assistant */}
+      {!isUser && showAvatar && (
+        <div className="flex-shrink-0 mb-1">
+          <ChatAvatar
+            expression={
+              message.tool_calls && message.tool_calls.length > 0
+                ? "happy"
+                : "idle"
+            }
+            size="sm"
+          />
+        </div>
+      )}
+
+      {/* Message bubble */}
+      <motion.div
         className={cn(
-          "max-w-[80%] rounded-lg px-4 py-2 shadow-sm transition-smooth hover-lift",
+          "max-w-[75%] rounded-2xl px-4 py-3",
+          "transition-all duration-200",
           isUser
-            ? "bg-blue-600 text-white"
-            : "bg-gray-100 text-gray-900"
+            ? [
+                "bg-gradient-to-br from-aurora-teal-500 via-aurora-purple-500 to-aurora-teal-600",
+                "text-white",
+                "rounded-br-md",
+                "shadow-lg shadow-aurora-purple-500/20",
+              ]
+            : [
+                "glass-card",
+                "text-foreground",
+                "rounded-bl-md",
+                "border border-border/50",
+              ]
         )}
+        whileHover={{ scale: 1.01 }}
+        transition={{ duration: 0.2 }}
       >
-        <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+        {/* Message content */}
+        <p className="whitespace-pre-wrap leading-relaxed text-sm">
+          {message.content}
+        </p>
 
         {/* Tool calls display */}
         {showToolCalls && message.tool_calls && message.tool_calls.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1 border-t border-gray-200/50 pt-2">
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className={cn(
+              "mt-3 flex flex-wrap gap-1.5 border-t pt-3",
+              isUser ? "border-white/20" : "border-border/50"
+            )}
+          >
             {message.tool_calls.map((tool, index) => (
               <ToolCallBadge key={index} tool={tool} />
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Timestamp */}
         {message.timestamp && (
-          <p
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
             className={cn(
-              "mt-1 text-xs animate-fade-in",
-              isUser ? "text-blue-200" : "text-gray-400"
+              "mt-2 text-xs",
+              isUser ? "text-white/70" : "text-muted-foreground"
             )}
           >
-            {message.timestamp.toLocaleTimeString()}
-          </p>
+            {message.timestamp.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </motion.p>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
+
+export default ChatMessage;

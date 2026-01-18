@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import type {
   Task,
   CreateTaskInput,
@@ -12,6 +14,7 @@ import type {
   TaskFormErrors,
 } from "@/types/task";
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/types/task";
+import { slideUpVariants, scaleInVariants } from "@/lib/animations";
 
 interface TaskFormProps {
   mode: "create" | "edit";
@@ -21,6 +24,16 @@ interface TaskFormProps {
   isSubmitting?: boolean;
 }
 
+/**
+ * Enhanced Task Form Component
+ *
+ * Features:
+ * - Glassmorphism modal design
+ * - Floating label animations
+ * - Aurora-styled inputs
+ * - Smooth form transitions
+ * - Priority selector with gradient badges
+ */
 export function TaskForm({
   mode,
   initialData,
@@ -101,23 +114,63 @@ export function TaskForm({
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {errors.general && (
-        <div
-          className="rounded-md bg-red-50 p-3 text-sm text-red-700"
-          role="alert"
-        >
-          {errors.general}
-        </div>
-      )}
+  const priorityColors: Record<string, string> = {
+    low: "from-aurora-green-500 to-aurora-green-600",
+    medium: "from-aurora-blue-500 to-aurora-blue-600",
+    high: "from-aurora-purple-500 to-aurora-purple-600",
+  };
 
-      <div>
+  return (
+    <motion.form
+      variants={slideUpVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      onSubmit={handleSubmit}
+      className="space-y-5"
+    >
+      {/* Error alert */}
+      <AnimatePresence>
+        {errors.general && (
+          <motion.div
+            variants={scaleInVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-600 dark:text-red-400"
+            role="alert"
+          >
+            <div className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {errors.general}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Title field */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
         <label
           htmlFor="task-title"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-2"
         >
-          Title <span className="text-red-500">*</span>
+          Title <span className="text-aurora-purple-500">*</span>
         </label>
         <Input
           ref={titleInputRef}
@@ -129,13 +182,19 @@ export function TaskForm({
           placeholder="What needs to be done?"
           disabled={isSubmitting}
           maxLength={255}
+          className="glass-subtle border-border/50 focus:border-aurora-teal-500/50"
         />
-      </div>
+      </motion.div>
 
-      <div>
+      {/* Description field */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
         <label
           htmlFor="task-description"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Description
         </label>
@@ -147,14 +206,21 @@ export function TaskForm({
           placeholder="Add more details (optional)"
           disabled={isSubmitting}
           rows={3}
+          className="glass-subtle border-border/50 focus:border-aurora-teal-500/50"
         />
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Status and Priority row */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+      >
         <div>
           <label
             htmlFor="task-status"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-foreground mb-2"
           >
             Status
           </label>
@@ -171,7 +237,7 @@ export function TaskForm({
         <div>
           <label
             htmlFor="task-priority"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-foreground mb-2"
           >
             Priority
           </label>
@@ -184,12 +250,39 @@ export function TaskForm({
             error={errors.priority}
           />
         </div>
-      </div>
+      </motion.div>
 
-      <div>
+      {/* Priority visual indicator */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="flex gap-2 items-center"
+      >
+        <span className="text-xs text-muted-foreground">Selected priority:</span>
+        <motion.span
+          key={priority}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className={cn(
+            "px-3 py-1 rounded-full text-xs font-medium text-white",
+            "bg-gradient-to-r",
+            priorityColors[priority]
+          )}
+        >
+          {priority.charAt(0).toUpperCase() + priority.slice(1)}
+        </motion.span>
+      </motion.div>
+
+      {/* Due date field */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
         <label
           htmlFor="task-due-date"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Due Date
         </label>
@@ -200,51 +293,104 @@ export function TaskForm({
           onChange={(e) => setDueDate(e.target.value)}
           error={errors.due_date}
           disabled={isSubmitting}
+          className="glass-subtle border-border/50 focus:border-aurora-teal-500/50"
         />
-      </div>
+      </motion.div>
 
-      <div className="flex justify-end gap-3 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              {mode === "create" ? "Creating..." : "Saving..."}
-            </>
-          ) : mode === "create" ? (
-            "Create Task"
-          ) : (
-            "Save Changes"
-          )}
-        </Button>
-      </div>
-    </form>
+      {/* Action buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="flex justify-end gap-3 pt-4 border-t border-border/50"
+      >
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="border-border/50 hover:bg-muted/50"
+          >
+            Cancel
+          </Button>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn-aurora"
+          >
+            <span className="flex items-center gap-2">
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  {mode === "create" ? "Creating..." : "Saving..."}
+                </>
+              ) : mode === "create" ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                  </svg>
+                  Create Task
+                </>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                  Save Changes
+                </>
+              )}
+            </span>
+          </Button>
+        </motion.div>
+      </motion.div>
+    </motion.form>
   );
 }
+
+export default TaskForm;

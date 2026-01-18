@@ -2,15 +2,45 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
+import { ChatAvatar, ChatAvatarWithName } from "./chat-avatar";
+import { TypingIndicator } from "./typing-indicator";
 import {
   ChatMessage as ChatMessageType,
   sendChatMessage,
 } from "@/lib/api/chat";
 import { useSession } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import {
+  staggerContainerVariants,
+  staggerItemVariants,
+  scaleInVariants,
+  fadeVariants,
+} from "@/lib/animations";
 
-export function ChatContainer() {
+interface ChatContainerProps {
+  className?: string;
+  isFloating?: boolean;
+  onClose?: () => void;
+}
+
+/**
+ * Enhanced Chat Container with Aurora Design
+ *
+ * Features:
+ * - Glassmorphism card design
+ * - Animated gradient border
+ * - Avatar in header with name "Aiden"
+ * - Smooth open/close transitions
+ * - Staggered message animations
+ */
+export function ChatContainer({
+  className,
+  isFloating = false,
+  onClose,
+}: ChatContainerProps) {
   const { data: session, isPending: isSessionLoading } = useSession();
   const router = useRouter();
   const [messages, setMessages] = React.useState<ChatMessageType[]>([]);
@@ -63,45 +93,166 @@ export function ChatContainer() {
     }
   };
 
+  // Loading state
   if (isSessionLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex items-center gap-2 text-gray-500">
-          <svg
-            className="h-5 w-5 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          <span>Loading...</span>
-        </div>
+      <div className={cn("flex h-full items-center justify-center", className)}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <ChatAvatar expression="thinking" size="lg" showThinkingBubble />
+          <p className="text-muted-foreground animate-pulse">Loading...</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <motion.div
+      variants={scaleInVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className={cn(
+        "flex flex-col",
+        isFloating
+          ? "h-[500px] w-[380px] rounded-2xl glass-card overflow-hidden shadow-2xl"
+          : "h-full",
+        className
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-border/50 bg-gradient-to-r from-aurora-teal-500/10 via-aurora-purple-500/10 to-aurora-green-500/10 px-4 py-3">
+        <ChatAvatarWithName
+          expression={isLoading ? "thinking" : "idle"}
+          size="sm"
+          showName
+        />
+
+        {isFloating && onClose && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Close chat"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </motion.button>
+        )}
+      </div>
+
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-center animate-fade-in-up">
-            <div className="rounded-full bg-blue-100 p-4 animate-bounce-in">
+        <AnimatePresence mode="popLayout">
+          {messages.length === 0 ? (
+            <motion.div
+              key="empty-state"
+              variants={fadeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex h-full flex-col items-center justify-center text-center px-4"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              >
+                <ChatAvatar expression="happy" size="xl" />
+              </motion.div>
+
+              <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-4 text-lg font-semibold text-aurora"
+              >
+                Hi, I&apos;m Aiden!
+              </motion.h3>
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-2 max-w-xs text-sm text-muted-foreground"
+              >
+                I can help you manage your tasks. Try asking me something like:
+              </motion.p>
+
+              <motion.ul
+                variants={staggerContainerVariants}
+                initial="hidden"
+                animate="visible"
+                className="mt-4 space-y-2 text-sm"
+              >
+                {[
+                  "Add a task to buy groceries tomorrow",
+                  "Show me my pending tasks",
+                  "Mark the grocery task as done",
+                ].map((suggestion, index) => (
+                  <motion.li
+                    key={index}
+                    variants={staggerItemVariants}
+                    className="px-3 py-2 rounded-lg bg-muted/50 text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-colors"
+                    onClick={() => handleSendMessage(suggestion)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    &quot;{suggestion}&quot;
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </motion.div>
+          ) : (
+            <motion.div
+              variants={staggerContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-4"
+            >
+              {messages.map((message, index) => (
+                <ChatMessage key={index} message={message} />
+              ))}
+
+              {/* Typing Indicator */}
+              <AnimatePresence>
+                {isLoading && (
+                  <TypingIndicator showAvatar />
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Error display */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="mx-4 mb-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-600 dark:text-red-400"
+          >
+            <div className="flex items-center gap-2">
               <svg
-                className="h-8 w-8 text-blue-600"
+                className="h-4 w-4 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -110,63 +261,25 @@ export function ChatContainer() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
+              <span>{error}</span>
             </div>
-            <h3 className="mt-4 text-lg font-medium text-gray-900 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              Start a conversation
-            </h3>
-            <p className="mt-2 max-w-md text-sm text-gray-500 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              I can help you manage your tasks. Try saying something like:
-            </p>
-            <ul className="mt-3 space-y-2 text-sm text-gray-600">
-              <li className="animate-slide-up" style={{ animationDelay: "0.3s" }}>&quot;Add a task to buy groceries tomorrow&quot;</li>
-              <li className="animate-slide-up" style={{ animationDelay: "0.4s" }}>&quot;Show me my pending tasks&quot;</li>
-              <li className="animate-slide-up" style={{ animationDelay: "0.5s" }}>&quot;Mark the grocery task as done&quot;</li>
-            </ul>
-          </div>
-        ) : (
-          <>
-            {messages.map((message, index) => (
-              <ChatMessage key={index} message={message} />
-            ))}
-            {isLoading && (
-              <div className="flex justify-start animate-slide-in-left">
-                <div className="max-w-[80%] rounded-lg bg-gray-100 px-4 py-3 shadow-sm">
-                  <div className="flex items-center gap-1.5">
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-400 animate-typing-dot" style={{ animationDelay: "0ms" }} />
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-400 animate-typing-dot" style={{ animationDelay: "0.2s" }} />
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-400 animate-typing-dot" style={{ animationDelay: "0.4s" }} />
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+          </motion.div>
         )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Error display */}
-      {error && (
-        <div className="mx-4 mb-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 border border-red-200 animate-slide-down shadow-sm">
-          <div className="flex items-center gap-2">
-            <svg className="h-4 w-4 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{error}</span>
-          </div>
-        </div>
-      )}
+      </AnimatePresence>
 
       {/* Input area */}
-      <div className="border-t bg-white p-4">
+      <div className="border-t border-border/50 bg-background/50 backdrop-blur-sm p-4">
         <ChatInput
           onSend={handleSendMessage}
           disabled={isLoading}
-          placeholder="Type a message to manage your tasks..."
+          placeholder="Ask Aiden to manage your tasks..."
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
+
+export default ChatContainer;
