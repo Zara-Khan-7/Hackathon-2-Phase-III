@@ -94,10 +94,10 @@ export function Dialog({ open, onClose, children, title, description }: DialogPr
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity z-[100]"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -111,7 +111,7 @@ export function Dialog({ open, onClose, children, title, description }: DialogPr
         aria-describedby={description ? "dialog-description" : undefined}
         tabIndex={-1}
         className={cn(
-          "relative bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4",
+          "relative z-[101] bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4",
           "max-h-[90vh] overflow-y-auto",
           "animate-in fade-in-0 zoom-in-95"
         )}

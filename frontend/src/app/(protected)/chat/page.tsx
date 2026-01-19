@@ -8,10 +8,10 @@ import { SignOutButton } from "@/components/auth/signout-button";
 
 function ChatLoading() {
   return (
-    <div className="flex h-full items-center justify-center">
-      <div className="flex items-center gap-2 text-gray-500">
+    <div className="flex h-full items-center justify-center bg-background">
+      <div className="flex items-center gap-2 text-muted-foreground">
         <svg
-          className="h-5 w-5 animate-spin"
+          className="h-5 w-5 animate-spin text-aurora-teal-500"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -40,22 +40,22 @@ function ChatPageContent() {
   const { data: session } = useSession();
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div className="flex h-screen flex-col bg-background">
       {/* Header */}
-      <header className="border-b bg-white shadow-sm animate-slide-down">
+      <header className="border-b border-border/50 glass animate-slide-down">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900">AI Task Assistant</h1>
+            <h1 className="text-xl font-bold text-foreground">AI Task Assistant</h1>
             <nav className="flex gap-2">
               <Link
                 href="/dashboard"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors duration-200"
               >
                 Dashboard
               </Link>
               <Link
                 href="/chat"
-                className="rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors duration-200"
+                className="rounded-md bg-aurora-teal-500/10 px-3 py-1.5 text-sm font-medium text-aurora-teal-700 dark:text-aurora-teal-400 border border-aurora-teal-500/20 transition-colors duration-200"
               >
                 Chat
               </Link>
@@ -63,7 +63,7 @@ function ChatPageContent() {
           </div>
           <div className="flex items-center gap-4">
             {session?.user && (
-              <span className="text-sm text-gray-600 animate-fade-in">
+              <span className="text-sm text-muted-foreground animate-fade-in hidden sm:inline">
                 {session.user.name || session.user.email}
               </span>
             )}
@@ -74,7 +74,7 @@ function ChatPageContent() {
 
       {/* Chat Container */}
       <main className="flex-1 overflow-hidden">
-        <div className="mx-auto h-full max-w-4xl">
+        <div className="mx-auto h-full max-w-4xl px-4">
           <ChatContainer />
         </div>
       </main>
