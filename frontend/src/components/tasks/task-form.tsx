@@ -182,7 +182,6 @@ export function TaskForm({
           placeholder="What needs to be done?"
           disabled={isSubmitting}
           maxLength={255}
-          className="glass-subtle border-border/50 focus:border-aurora-teal-500/50"
         />
       </motion.div>
 
@@ -206,7 +205,6 @@ export function TaskForm({
           placeholder="Add more details (optional)"
           disabled={isSubmitting}
           rows={3}
-          className="glass-subtle border-border/50 focus:border-aurora-teal-500/50"
         />
       </motion.div>
 
@@ -293,7 +291,6 @@ export function TaskForm({
           onChange={(e) => setDueDate(e.target.value)}
           error={errors.due_date}
           disabled={isSubmitting}
-          className="glass-subtle border-border/50 focus:border-aurora-teal-500/50"
         />
       </motion.div>
 

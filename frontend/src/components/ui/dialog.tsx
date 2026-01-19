@@ -111,19 +111,19 @@ export function Dialog({ open, onClose, children, title, description }: DialogPr
         aria-describedby={description ? "dialog-description" : undefined}
         tabIndex={-1}
         className={cn(
-          "relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4",
+          "relative bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4",
           "max-h-[90vh] overflow-y-auto",
           "animate-in fade-in-0 zoom-in-95"
         )}
       >
         <div className="p-6">
           {title && (
-            <h2 id="dialog-title" className="text-lg font-semibold mb-2">
+            <h2 id="dialog-title" className="text-lg font-semibold text-foreground mb-2">
               {title}
             </h2>
           )}
           {description && (
-            <p id="dialog-description" className="text-sm text-gray-500 mb-4">
+            <p id="dialog-description" className="text-sm text-muted-foreground mb-4">
               {description}
             </p>
           )}

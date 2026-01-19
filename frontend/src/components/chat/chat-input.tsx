@@ -148,12 +148,12 @@ export function ChatInput({
             rows={1}
             className={cn(
               "w-full resize-none rounded-xl px-4 py-3",
-              "bg-muted/30 backdrop-blur-sm",
-              "border border-border/50",
-              "focus:outline-none focus:border-aurora-teal-500/50",
+              "bg-card text-foreground",
+              "border border-border",
+              "focus:outline-none focus:border-aurora-teal-500 focus:ring-2 focus:ring-aurora-teal-500/20",
               "transition-all duration-200",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              "placeholder:text-muted-foreground/50",
+              "placeholder:text-muted-foreground",
               "text-sm"
             )}
           />
@@ -199,9 +199,9 @@ export function ChatInput({
       </form>
 
       {/* Helper text */}
-      <p className="text-xs text-muted-foreground/50 text-center">
-        Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd> to send,{" "}
-        <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Shift+Enter</kbd> for new line
+      <p className="text-xs text-muted-foreground text-center">
+        Press <kbd className="px-1.5 py-0.5 bg-muted text-foreground rounded text-[10px] font-mono">Enter</kbd> to send,{" "}
+        <kbd className="px-1.5 py-0.5 bg-muted text-foreground rounded text-[10px] font-mono">Shift+Enter</kbd> for new line
       </p>
     </div>
   );
