@@ -93,27 +93,31 @@ export function ChatMessage({
       {/* Message bubble */}
       <motion.div
         className={cn(
-          "max-w-[75%] rounded-2xl px-4 py-3",
+          "max-w-[75%] sm:max-w-[75%] max-sm:max-w-[85%] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3",
           "transition-all duration-200",
           isUser
             ? [
-                "bg-gradient-to-br from-aurora-teal-500 via-aurora-purple-500 to-aurora-teal-600",
-                "text-white",
+                "bg-gradient-to-br from-aurora-teal-600 via-aurora-purple-600 to-aurora-teal-700",
+                "text-white font-medium",
                 "rounded-br-md",
-                "shadow-lg shadow-aurora-purple-500/20",
+                "shadow-lg shadow-aurora-purple-500/30",
               ]
             : [
                 "glass-card",
                 "text-foreground",
                 "rounded-bl-md",
                 "border border-border/50",
+                "bg-card",
               ]
         )}
         whileHover={{ scale: 1.01 }}
         transition={{ duration: 0.2 }}
       >
         {/* Message content */}
-        <p className="whitespace-pre-wrap leading-relaxed text-sm">
+        <p className={cn(
+          "whitespace-pre-wrap leading-relaxed text-sm",
+          isUser ? "text-white" : "text-foreground"
+        )}>
           {message.content}
         </p>
 

@@ -80,13 +80,13 @@ export function SignupForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {errors.general && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">
+        <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-700 dark:text-red-400">
           {errors.general}
         </div>
       )}
 
       <div className="space-y-2">
-        <label htmlFor="name" className="text-sm font-medium">
+        <label htmlFor="name" className="text-sm font-medium text-foreground">
           Name
         </label>
         <Input
@@ -100,7 +100,7 @@ export function SignupForm() {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email
         </label>
         <Input
@@ -114,7 +114,7 @@ export function SignupForm() {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className="text-sm font-medium text-foreground">
           Password
         </label>
         <Input

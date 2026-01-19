@@ -80,7 +80,11 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
         "fixed left-0 top-0 z-40 h-screen",
         "glass border-r border-border/50",
         "transition-all duration-300",
-        isCollapsed ? "w-20" : "w-64"
+        // Mobile: hidden by default, collapsible
+        "max-md:hidden md:block",
+        isCollapsed ? "w-20" : "w-64",
+        // Tablet: always collapsed
+        "md:max-lg:w-20"
       )}
     >
       <div className="flex h-full flex-col">

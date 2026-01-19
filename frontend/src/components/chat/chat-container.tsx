@@ -118,7 +118,7 @@ export function ChatContainer({
       className={cn(
         "flex flex-col",
         isFloating
-          ? "h-[500px] w-[380px] rounded-2xl glass-card overflow-hidden shadow-2xl"
+          ? "h-[70vh] sm:h-[500px] w-[calc(100vw-2rem)] sm:w-[380px] max-w-[380px] rounded-2xl glass-card overflow-hidden shadow-2xl"
           : "h-full",
         className
       )}
@@ -189,7 +189,7 @@ export function ChatContainer({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mt-2 max-w-xs text-sm text-muted-foreground"
+                className="mt-2 max-w-xs text-sm text-foreground/80"
               >
                 I can help you manage your tasks. Try asking me something like:
               </motion.p>
@@ -208,7 +208,7 @@ export function ChatContainer({
                   <motion.li
                     key={index}
                     variants={staggerItemVariants}
-                    className="px-3 py-2 rounded-lg bg-muted/50 text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-colors"
+                    className="px-3 py-2 rounded-lg bg-card border border-border/50 text-foreground cursor-pointer hover:bg-aurora-teal-500/10 hover:border-aurora-teal-500/30 transition-colors text-sm"
                     onClick={() => handleSendMessage(suggestion)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}

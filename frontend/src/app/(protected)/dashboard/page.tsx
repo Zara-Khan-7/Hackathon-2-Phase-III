@@ -158,22 +158,22 @@ function DashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white shadow-sm">
+      <header className="border-b border-border/50 glass">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900">Todo App</h1>
+            <h1 className="text-xl font-bold text-foreground">Todo App</h1>
             <nav className="flex gap-2">
               <Link
                 href="/dashboard"
-                className="rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700"
+                className="rounded-md bg-aurora-teal-500/10 px-3 py-1.5 text-sm font-medium text-aurora-teal-700 dark:text-aurora-teal-400 border border-aurora-teal-500/20"
               >
                 Dashboard
               </Link>
               <Link
                 href="/chat"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
                 Chat
               </Link>
@@ -181,7 +181,7 @@ function DashboardContent() {
           </div>
           <div className="flex items-center gap-4">
             {session?.user && (
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-muted-foreground hidden sm:inline">
                 {session.user.name || session.user.email}
               </span>
             )}
@@ -195,8 +195,8 @@ function DashboardContent() {
         {/* Page Title & Add Button */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Your Tasks</h2>
-            <p className="text-gray-600">
+            <h2 className="text-2xl font-bold text-foreground">Your Tasks</h2>
+            <p className="text-muted-foreground">
               Manage your tasks and stay organized
             </p>
           </div>
@@ -299,10 +299,10 @@ function DashboardContent() {
 // Loading fallback for Suspense
 function DashboardLoading() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="flex items-center gap-2 text-gray-500">
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex items-center gap-2 text-muted-foreground">
         <svg
-          className="animate-spin h-5 w-5"
+          className="animate-spin h-5 w-5 text-aurora-teal-500"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

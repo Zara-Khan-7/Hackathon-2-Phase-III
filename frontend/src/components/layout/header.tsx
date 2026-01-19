@@ -60,15 +60,22 @@ export function Header({ className, sidebarCollapsed = false }: HeaderProps) {
         "fixed top-0 right-0 z-30 h-16",
         "glass border-b border-border/50",
         "transition-all duration-300",
-        sidebarCollapsed ? "left-20" : "left-64",
+        // Mobile: full width
+        "left-0 md:left-64",
+        // Tablet: account for collapsed sidebar
+        "md:max-lg:left-20",
+        // Desktop: follow sidebar state
+        sidebarCollapsed && "lg:left-20",
+        !sidebarCollapsed && "lg:left-64",
         className
       )}
     >
-      <div className="flex h-full items-center justify-between px-6">
+      <div className="flex h-full items-center justify-between px-4 md:px-6">
         {/* Page title area - can be customized via props */}
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold text-foreground">
-            Welcome back
+        <div className="flex items-center gap-2 md:gap-4">
+          <h1 className="text-base md:text-lg font-semibold text-foreground">
+            <span className="hidden sm:inline">Welcome back</span>
+            <span className="sm:hidden">Hi</span>
             {session?.user?.name && (
               <span className="text-aurora">, {session.user.name.split(" ")[0]}</span>
             )}
@@ -76,7 +83,7 @@ export function Header({ className, sidebarCollapsed = false }: HeaderProps) {
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Theme toggle */}
           {mounted && (
             <motion.button
