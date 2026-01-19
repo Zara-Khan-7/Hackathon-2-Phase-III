@@ -34,8 +34,9 @@ export const auth = betterAuth({
   },
   trustedOrigins: [
     "http://localhost:3000",
-    "https://frontend-murex-eta-83.vercel.app",
+    "https://hackathon-2-phase-iii-zara-yousuf-khans-projects.vercel.app",
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+    process.env.NEXT_PUBLIC_APP_URL || "",
   ].filter(Boolean),
 });
 
